@@ -243,7 +243,11 @@ shell = find_program('sh', dirs: program_path, native: true)
 tar = find_program('tar', dirs: program_path, native: true)
 time = find_program('time', dirs: program_path, required: get_option('benchmarks'))
 
-target_shell = find_program('sh', dirs: program_path, native: false)
+# Detect the target shell that is used by Git at runtime. Note that we prefer
+# "/bin/sh" over a PATH-based lookup, which provides a working shell on most
+# supported systems. This path is also the default shell path used by our
+# Makefile. This lookup can be overridden via `program_path`.
+target_shell = find_program('sh', dirs: program_path + [ '/bin' ], native: false)
 
 # Sanity-check that programs required for the build exist.
 foreach tool : ['cat', 'cut', 'grep', 'sort', 'tr', 'uname']
@@ -1900,14 +1904,19 @@ if perl_features_enabled
     perl_header_template = 'perl/header_templates/runtime_prefix.template.pl'
   endif
 
+  perllibdir = get_option('perllibdir')
+  if perllibdir == ''
+    perllibdir = get_option('datadir') / 'perl5'
+  endif
+
   perl_header = configure_file(
     input: perl_header_template,
     output: 'GIT-PERL-HEADER',
     configuration: {
       'GITEXECDIR_REL': get_option('libexecdir') / 'git-core',
-      'PERLLIBDIR_REL': get_option('datadir') / 'perl5',
+      'PERLLIBDIR_REL': perllibdir,
       'LOCALEDIR_REL': get_option('datadir') / 'locale',
-      'INSTLIBDIR': get_option('datadir') / 'perl5',
+      'INSTLIBDIR': perllibdir,
       'PATHSEP': pathsep,
     },
   )
@@ -2174,3 +2183,9 @@ summary({
   'sha256': sha256_backend,
   'zlib': zlib_backend,
 }, section: 'Backends')
+
+summary({
+  'perl': target_perl,
+  'python': target_python,
+  'shell': target_shell,
+}, section: 'Runtime executable paths')
