@@ -53,6 +53,29 @@ UI, Workflows & Features
 
  * The build procedure installs bash (but not zsh) completion script.
 
+ * send-email has been updated to work better with Outlook's smtp server.
+
+ * "git diff --minimal" used to give non-minimal output when its
+   optimization kicked in, which has been disabled.
+
+ * "git index-pack --fix-thin" used to abort to prevent a cycle in
+   delta chains from forming in a corner case even when there is no
+   such cycle.
+
+ * Make repository clean-up tasks "gc" can do available to "git
+   maintenance" front-end.
+
+ * Bundle-URI feature did not use refs recorded in the bundle other
+   than normal branches as anchoring points to optimize the follow-up
+   fetch during "git clone"; now it is told to utilize all.
+
+ * The `send-email` documentation has been updated with OAuth2.0
+   related examples.
+
+ * Two of the "scalar" subcommands that add a repository that hasn't
+   been under "scalar"'s control are taught an option not to enable the
+   scheduled maintenance on it.
+
 
 Performance, Internal Implementation, Development Support etc.
 --------------------------------------------------------------
@@ -133,6 +156,16 @@ Performance, Internal Implementation, Development Support etc.
  * Code clean-up for meson-based build infrastructure.
 
  * Add an equivalent to "make hdr-check" target to meson based builds.
+
+ * Further code clean-up in the object-store layer.
+
+ * Build performance fix.
+
+ * Teach "git send-email" to also consult `hostname -f` for mail
+   domain to compute the identity given to SMTP servers.
+
+ * The dependency on the_repository variable has been reduced from the
+   code paths in "git replay".
 
 
 Fixes since v2.49
@@ -251,6 +284,46 @@ Fixes since v2.49
 
  * Update to arm64 Windows port.
    (merge 436a42215e js/windows-arm64 later to maint).
+ * hashmap API clean-up to ensure hashmap_clear() leaves a cleared map
+   in a reusable state.
+   (merge 9481877de3 en/hashmap-clear-fix later to maint).
+
+ * "git mv a a/b dst" would ask to move the directory 'a' itself, as
+   well as its contents, in a single destination directory, which is
+   a contradicting request that is impossible to satisfy. This case is
+   now detected and the command errors out.
+   (merge 974f0d4664 ps/mv-contradiction-fix later to maint).
+
+ * Further refinement on CI messages when an optional external
+   software is unavailable (e.g. due to third-party service outage).
+   (merge 956acbefbd jc/ci-skip-unavailable-external-software later to maint).
+
+ * Test result aggregation did not work in Meson based CI jobs.
+   (merge bd38ed5be1 ps/ci-test-aggreg-fix-for-meson later to maint).
+
+ * Code clean-up around stale CI elements and building with Visual Studio.
+   (merge a7b060f67f js/ci-buildsystems-cleanup later to maint).
+
+ * "git add 'f?o'" did not add 'foo' if 'f?o', an unusual pathname,
+   also existed on the working tree, which has been corrected.
+   (merge ec727e189c kj/glob-path-with-special-char later to maint).
+
+ * The fallback implementation of open_nofollow() depended on
+   open("symlink", O_NOFOLLOW) to set errno to ELOOP, but a few BSD
+   derived systems use different errno, which has been worked around.
+   (merge f47bcc3413 cf/wrapper-bsd-eloop later to maint).
+
+ * Use-after-free fix in the sequencer.
+   (merge 5dbaec628d pw/sequencer-reflog-use-after-free later to maint).
+
+ * win+Meson CI pipeline, unlike other pipelines for Windows,
+   used to build artifacts in develper mode, which has been changed to
+   build them in release mode for consistency.
+   (merge 184abdcf05 js/ci-build-win-in-release-mode later to maint).
+
+ * CI settings at GitLab has been updated to run MSVC based Meson job
+   automatically (as opposed to be done only upon manual request).
+   (merge 6389579b2f ps/ci-gitlab-enable-msvc-meson-job later to maint).
 
  * Other code cleanup, docfix, build fix, etc.
    (merge 227c4f33a0 ja/doc-block-delimiter-markup-fix later to maint).
@@ -277,3 +350,8 @@ Fixes since v2.49
    (merge 25292c301d lo/remove-log-reencode-from-rev-info later to maint).
    (merge 1aa50636fd jk/p5332-testfix later to maint).
    (merge 42cf4ac552 ps/ci-resurrect-p4-on-github later to maint).
+   (merge 104add8368 js/diff-codeql-false-positive-workaround later to maint).
+   (merge f62977b93c en/get-tree-entry-doc later to maint).
+   (merge e5dd0a05ed ly/am-split-stgit-leakfix later to maint).
+   (merge bac220e154 rc/t1001-test-path-is-file later to maint).
+   (merge 91db6c735d ly/reftable-writer-leakfix later to maint).
